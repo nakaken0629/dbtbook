@@ -1,0 +1,16 @@
+customer_id,customer_name,email,address,registered_at
+1,田中太郎,tanaka.taro@example.com,東京都新宿区,2025-03-15
+2,佐藤花子,sato.hanako@example.com,大阪府大阪市,2025-04-02
+3,鈴木一郎,suzuki.ichiro@example.com,神奈川県横浜市,2025-04-20
+4,高橋美咲,takahashi.misaki@example.com,愛知県名古屋市,2025-05-11
+5,伊藤健太,ito.kenta@example.com,福岡県福岡市,2025-05-30
+6,渡辺さくら,watanabe.sakura@example.com,北海道札幌市,2025-06-18
+7,山本大輔,yamamoto.daisuke@example.com,埼玉県さいたま市,2025-07-02
+8,中村結衣,nakamura.yui@example.com,千葉県千葉市,2025-07-25
+9,小林翔太,kobayashi.shota@example.com,兵庫県神戸市,2025-08-14
+10,加藤凛,kato.rin@example.com,京都府京都市,2025-09-05
+11,吉田健二,yoshida.kenji@example.com,静岡県静岡市,2025-10-01
+12,山田美緒,yamada.mio@example.com,広島県広島市,2025-10-20
+13,佐々木大和,sasaki.yamato@example.com,宮城県仙台市,2025-11-12
+14,松本ゆな,matsumoto.yuna@example.com,新潟県新潟市,2025-12-03
+15,井上健一,inoue.kenichi@example.com,岡山県岡山市,2026-01-15

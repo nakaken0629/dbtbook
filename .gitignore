@@ -1,0 +1,19 @@
+# Python virtual environment
+dbt-env/
+
+# dbt build artifacts
+**/target/
+**/dbt_packages/
+**/logs/
+logs/
+
+# DuckDB database files (datalake/ の CSV と scripts/ から再生成可能)
+*.duckdb
+*.duckdb.wal
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+.env
