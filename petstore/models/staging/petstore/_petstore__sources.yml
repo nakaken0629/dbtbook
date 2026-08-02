@@ -102,6 +102,10 @@ sources:
             description: 販売された商品のID。
           - name: quantity
             description: 数量。
+            data_tests:
+              - is_integer:
+                  arguments:
+                    pk_column_name: sales_id
           - name: unit_price
             description: 販売時単価。
           - name: amount

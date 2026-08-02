@@ -94,3 +94,47 @@ models:
         description: 販売時単価。
       - name: amount
         description: 明細金額（quantity × unit_price）。加算可能な売上金額の実測値。
+
+unit_tests:
+  - name: test_fct_sales_full_refresh_mode
+    description: >
+      is_incremental() が false（フルリフレッシュ／初回実行）の場合、
+      order_date による絞り込みを行わず、全件が対象になることを検証する。
+    model: fct_sales
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('stg_petstore__sales_details')
+        rows:
+          - { sales_detail_id: 1, sales_id: 100, product_id: 1, quantity: 2, unit_price: 500, amount: 1000 }
+      - input: ref('stg_petstore__sales')
+        rows:
+          - { sales_id: 100, customer_id: 1, order_date: "2026-07-01", total_amount: 1000 }
+    expect:
+      rows:
+        - { sales_detail_id: 1, sales_id: 100, customer_id: 1, product_id: 1, order_date: "2026-07-01", quantity: 2, unit_price: 500, amount: 1000 }
+
+  - name: test_fct_sales_incremental_mode
+    description: >
+      is_incremental() が true の場合、fct_sales（{{ this }}）に既に存在する
+      最大 order_date 以降の注文のみが対象になることを検証する。
+    model: fct_sales
+    overrides:
+      macros:
+        is_incremental: true
+    given:
+      - input: ref('stg_petstore__sales_details')
+        rows:
+          - { sales_detail_id: 1, sales_id: 100, product_id: 1, quantity: 1, unit_price: 500, amount: 500 }
+          - { sales_detail_id: 2, sales_id: 200, product_id: 2, quantity: 2, unit_price: 300, amount: 600 }
+      - input: ref('stg_petstore__sales')
+        rows:
+          - { sales_id: 100, customer_id: 1, order_date: "2026-06-30", total_amount: 500 } # this の最大order_dateより前 → 除外
+          - { sales_id: 200, customer_id: 2, order_date: "2026-07-02", total_amount: 600 } # this の最大order_dateより後 → 含む
+      - input: this
+        rows:
+          - { order_date: "2026-07-01" }
+    expect:
+      rows:
+        - { sales_detail_id: 2, sales_id: 200, customer_id: 2, product_id: 2, order_date: "2026-07-02", quantity: 2, unit_price: 300, amount: 600 }
