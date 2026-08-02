@@ -1,0 +1,20 @@
+with source as (
+
+    select * from {{ source('petstore', 'customer') }}
+
+),
+
+renamed as (
+
+    select
+        customer_id,
+        customer_name,
+        email,
+        address,
+        registered_at
+
+    from source
+
+)
+
+select * from renamed

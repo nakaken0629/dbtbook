@@ -1,0 +1,96 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: 顧客ディメンジョン。1行が1顧客に対応する。
+    columns:
+      - name: customer_id
+        description: 顧客ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: 顧客名。
+      - name: email
+        description: メールアドレス。
+      - name: address
+        description: 住所。
+      - name: registered_at
+        description: 会員登録日。
+
+  - name: dim_products
+    description: >
+      商品ディメンジョン。ペットとグッズを統合した商品マスタに、
+      動物種マスタ・グッズ種類マスタを非正規化して結合したスタースキーマ用の
+      ディメンジョンテーブル。1行が1商品に対応する。
+    columns:
+      - name: product_id
+        description: 商品ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+      - name: product_type
+        description: 商品区分（PET または GOODS）。
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["PET", "GOODS"]
+      - name: product_name
+        description: 商品名。
+      - name: price
+        description: 現行の販売価格（商品マスタ上の価格）。
+      - name: is_active
+        description: 現在販売中かどうか。
+      - name: species_id
+        description: 対象動物種ID。
+      - name: species_name
+        description: 対象動物種名（species_masterから非正規化）。
+      - name: goods_category_id
+        description: グッズ種類ID（GOODSのみ値あり）。
+      - name: goods_category_name
+        description: グッズ種類名（GOODSのみ値あり。goods_category_masterから非正規化）。
+      - name: description
+        description: 商品説明（PETのみ値あり）。
+
+  - name: fct_sales
+    description: >
+      売上ファクトテーブル。売上明細（sales_detail）を最小粒度とし、
+      売上ヘッダ（sales）から顧客・注文日を結合した、1行が1注文内の
+      1商品明細に対応するファクトテーブル。total_amountは明細金額(amount)を
+      sales_id単位でSUMすれば再計算できるため、このテーブルには保持しない。
+    columns:
+      - name: sales_detail_id
+        description: 売上明細ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+      - name: sales_id
+        description: 売上ID（注文番号）。縮退ディメンジョン。
+        data_tests:
+          - not_null
+      - name: customer_id
+        description: 注文した顧客のID。dim_customersへの外部キー。
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+      - name: product_id
+        description: 販売された商品のID。dim_productsへの外部キー。
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+      - name: order_date
+        description: 注文日。
+        data_tests:
+          - not_null
+      - name: quantity
+        description: 数量。
+      - name: unit_price
+        description: 販売時単価。
+      - name: amount
+        description: 明細金額（quantity × unit_price）。加算可能な売上金額の実測値。

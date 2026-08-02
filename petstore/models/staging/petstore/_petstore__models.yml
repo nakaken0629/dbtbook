@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: stg_petstore__customers
+    description: 顧客（購入者）情報。1行が1顧客に対応する。
+    columns:
+      - name: customer_id
+        description: 顧客ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_petstore__species
+    description: ペットの動物種を管理する区分値マスタ。
+    columns:
+      - name: species_id
+        description: 動物種ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_petstore__goods_categories
+    description: グッズの分類を管理する区分値マスタ。
+    columns:
+      - name: goods_category_id
+        description: グッズ種類ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_petstore__products
+    description: 販売するペットとグッズを統合した商品マスタ。1行が1商品に対応する。
+    columns:
+      - name: product_id
+        description: 商品ID。主キー。
+        data_tests:
+          - unique
+          - not_null
+      - name: product_type
+        description: 商品区分（PET または GOODS）。
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["PET", "GOODS"]
+
+  - name: stg_petstore__sales
+    description: 顧客からの注文（受注）ヘッダ。1行が1回の注文に対応する。
+    columns:
+      - name: sales_id
+        description: 売上ID（注文番号）。主キー。
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_petstore__sales_details
+    description: 売上に紐づく商品ごとの明細行。1行が1注文内の1商品明細に対応する。
+    columns:
+      - name: sales_detail_id
+        description: 売上明細ID。主キー。
+        data_tests:
+          - unique
+          - not_null

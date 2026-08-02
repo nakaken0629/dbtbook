@@ -1,0 +1,108 @@
+version: 2
+
+sources:
+  - name: petstore
+    description: >
+      オンラインペットショップの基幹データ（顧客・商品マスタ・売上）。
+      scripts/create_petstore_raw_views.sql により sources/ 配下のCSVを
+      petstore_raw スキーマのビューとして dev.duckdb 上に作成したもの。
+    schema: petstore_raw
+    tables:
+      - name: customer
+        description: 購入者（顧客）情報。
+        columns:
+          - name: customer_id
+            description: 顧客ID。主キー。
+            data_tests:
+              - unique
+              - not_null
+          - name: customer_name
+            description: 顧客名。
+          - name: email
+            description: メールアドレス。
+          - name: address
+            description: 住所。
+          - name: registered_at
+            description: 会員登録日。
+
+      - name: species_master
+        description: ペットの動物種（犬・猫・鳥など）を管理する区分値マスタ。
+        columns:
+          - name: species_id
+            description: 動物種ID。主キー。
+            data_tests:
+              - unique
+              - not_null
+          - name: species_name
+            description: 動物種名。
+
+      - name: goods_category_master
+        description: グッズ（えさ・すみか・遊び道具など）の分類を管理する区分値マスタ。
+        columns:
+          - name: goods_category_id
+            description: グッズ種類ID。主キー。
+            data_tests:
+              - unique
+              - not_null
+          - name: goods_category_name
+            description: グッズ種類名。
+
+      - name: product_master
+        description: >
+          販売するペットとグッズを1テーブルに統合した商品マスタ。
+          product_type で PET/GOODS を区別し、species_id は両タイプ共通、
+          goods_category_id は GOODS のみ、description は PET のみ値を持つ。
+        columns:
+          - name: product_id
+            description: 商品ID。主キー。
+            data_tests:
+              - unique
+              - not_null
+          - name: product_type
+            description: 商品区分（PET または GOODS）。
+          - name: product_name
+            description: 商品名。
+          - name: price
+            description: 販売価格。
+          - name: is_active
+            description: 現在販売中かどうか。
+          - name: species_id
+            description: 対象動物種ID（PET/GOODS共通で持ちうる）。
+          - name: goods_category_id
+            description: グッズ種類ID（GOODSのみ値あり）。
+          - name: description
+            description: 商品説明（PETのみ値あり）。
+
+      - name: sales
+        description: 顧客からの注文（受注）ヘッダ。1行が1回の注文に対応する。
+        columns:
+          - name: sales_id
+            description: 売上ID（注文番号）。主キー。
+            data_tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: 注文した顧客のID。
+          - name: order_date
+            description: 注文日。
+          - name: total_amount
+            description: 注文合計金額。
+
+      - name: sales_detail
+        description: 売上に紐づく商品ごとの明細行。数量・単価・金額を保持する。
+        columns:
+          - name: sales_detail_id
+            description: 売上明細ID。主キー。
+            data_tests:
+              - unique
+              - not_null
+          - name: sales_id
+            description: 紐づく売上（注文）のID。
+          - name: product_id
+            description: 販売された商品のID。
+          - name: quantity
+            description: 数量。
+          - name: unit_price
+            description: 販売時単価。
+          - name: amount
+            description: 明細金額（quantity × unit_price）。
