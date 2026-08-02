@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 オンラインペットショップ サンプルデータ生成スクリプト
-datalake/masters, datalake/sales, datalake/sales_detail 配下にCSVを出力する。
+sources/masters にマスタCSVを、
+sources/transactions（customer.csv, sales/, sales_detail/）にトランザクションCSVを出力する。
 """
 import csv
 import random
@@ -11,12 +12,13 @@ from pathlib import Path
 random.seed(42)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATALAKE_DIR = BASE_DIR / "datalake"
-MASTERS_DIR = DATALAKE_DIR / "masters"
-SALES_DIR = DATALAKE_DIR / "sales"
-SALES_DETAIL_DIR = DATALAKE_DIR / "sales_detail"
+SOURCES_DIR = BASE_DIR / "sources"
+MASTERS_DIR = SOURCES_DIR / "masters"
+TRANSACTIONS_DIR = SOURCES_DIR / "transactions"
+SALES_DIR = TRANSACTIONS_DIR / "sales"
+SALES_DETAIL_DIR = TRANSACTIONS_DIR / "sales_detail"
 
-for d in (MASTERS_DIR, SALES_DIR, SALES_DETAIL_DIR):
+for d in (MASTERS_DIR, TRANSACTIONS_DIR, SALES_DIR, SALES_DETAIL_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -111,7 +113,7 @@ PRODUCT_PRICE = {row[0]: row[3] for row in product_master_rows}
 PET_IDS = [p[0] for p in PETS]
 GOODS_IDS = [g[0] for g in GOODS]
 
-# ---------- customer_master ----------
+# ---------- customer（マスタではなくトランザクション系として transactions/ に置く） ----------
 CUSTOMERS = [
     (1, "田中太郎", "tanaka.taro@example.com", "東京都新宿区", date(2025, 3, 15)),
     (2, "佐藤花子", "sato.hanako@example.com", "大阪府大阪市", date(2025, 4, 2)),
@@ -130,7 +132,7 @@ CUSTOMERS = [
     (15, "井上健一", "inoue.kenichi@example.com", "岡山県岡山市", date(2026, 1, 15)),
 ]
 write_csv(
-    MASTERS_DIR / "customer_master.csv",
+    TRANSACTIONS_DIR / "customer.csv",
     ["customer_id", "customer_name", "email", "address", "registered_at"],
     CUSTOMERS,
 )
@@ -140,7 +142,7 @@ CUSTOMER_IDS = [c[0] for c in CUSTOMERS]
 START_DATE = date(2026, 7, 1)
 END_DATE = date(2026, 7, 31)
 
-order_id_seq = 1
+sales_id_seq = 1
 detail_id_seq = 1
 total_orders = 0
 total_details = 0
@@ -152,8 +154,8 @@ while current <= END_DATE:
 
     num_orders = random.randint(3, 8)
     for _ in range(num_orders):
-        order_id = order_id_seq
-        order_id_seq += 1
+        sales_id = sales_id_seq
+        sales_id_seq += 1
         customer_id = random.choice(CUSTOMER_IDS)
 
         num_items = random.randint(1, 3)
@@ -167,21 +169,21 @@ while current <= END_DATE:
             total_amount += amount
 
             day_detail_rows.append(
-                (detail_id_seq, order_id, product_id, quantity, unit_price, amount)
+                (detail_id_seq, sales_id, product_id, quantity, unit_price, amount)
             )
             detail_id_seq += 1
 
-        day_sales_rows.append((order_id, customer_id, current.isoformat(), total_amount))
+        day_sales_rows.append((sales_id, customer_id, current.isoformat(), total_amount))
 
     date_str = current.strftime("%Y%m%d")
     write_csv(
         SALES_DIR / f"sales_{date_str}.csv",
-        ["order_id", "customer_id", "order_date", "total_amount"],
+        ["sales_id", "customer_id", "order_date", "total_amount"],
         day_sales_rows,
     )
     write_csv(
         SALES_DETAIL_DIR / f"sales_detail_{date_str}.csv",
-        ["sales_detail_id", "order_id", "product_id", "quantity", "unit_price", "amount"],
+        ["sales_detail_id", "sales_id", "product_id", "quantity", "unit_price", "amount"],
         day_detail_rows,
     )
 
