@@ -1,3 +1,11 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='sales_detail_id',
+        incremental_strategy='delete+insert'
+    )
+}}
+
 with sales_details as (
 
     select * from {{ ref('stg_petstore__sales_details') }}
@@ -7,6 +15,10 @@ with sales_details as (
 sales as (
 
     select * from {{ ref('stg_petstore__sales') }}
+
+    {% if is_incremental() %}
+    where order_date >= (select max(order_date) from {{ this }})
+    {% endif %}
 
 ),
 
