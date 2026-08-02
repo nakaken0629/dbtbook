@@ -29,5 +29,7 @@ models:
   petstore:
     staging:
       +materialized: view
+      +schema: staging
     marts:
       +materialized: table
+      +schema: marts
