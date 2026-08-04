@@ -1,16 +1,16 @@
-customer_id,customer_name,email,address,registered_at
-1,田中太郎,tanaka.taro@example.com,東京都新宿区,2025-03-15
-2,佐藤花子,sato.hanako@example.com,大阪府大阪市,2025-04-02
-3,鈴木一郎,suzuki.ichiro@example.com,神奈川県横浜市,2025-04-20
-4,高橋美咲,takahashi.misaki@example.com,愛知県名古屋市,2025-05-11
-5,伊藤健太,ito.kenta@example.com,福岡県福岡市,2025-05-30
-6,渡辺さくら,watanabe.sakura@example.com,北海道札幌市,2025-06-18
-7,山本大輔,yamamoto.daisuke@example.com,埼玉県さいたま市,2025-07-02
-8,中村結衣,nakamura.yui@example.com,千葉県千葉市,2025-07-25
-9,小林翔太,kobayashi.shota@example.com,兵庫県神戸市,2025-08-14
-10,加藤凛,kato.rin@example.com,京都府京都市,2025-09-05
-11,吉田健二,yoshida.kenji@example.com,静岡県静岡市,2025-10-01
-12,山田美緒,yamada.mio@example.com,広島県広島市,2025-10-20
-13,佐々木大和,sasaki.yamato@example.com,宮城県仙台市,2025-11-12
-14,松本ゆな,matsumoto.yuna@example.com,新潟県新潟市,2025-12-03
-15,井上健一,inoue.kenichi@example.com,岡山県岡山市,2026-01-15
+customer_id,customer_name,email,address,registered_at,created_at,updated_at
+1,田中太郎,tanaka.taro@example.com,東京都新宿区,2026-04-23 11:26:18,2026-04-23 11:26:18,2026-06-02 05:26:17
+2,佐藤花子,sato.hanako@example.com,大阪府大阪市,2026-05-09 19:31:07,2026-05-09 19:31:07,2026-10-19 03:06:03
+3,鈴木一郎,suzuki.ichiro@example.com,神奈川県横浜市,2026-04-13 14:40:28,2026-04-13 14:40:28,2026-05-21 16:49:39
+4,高橋美咲,takahashi.misaki@example.com,愛知県名古屋市,2026-06-14 19:00:26,2026-06-14 19:00:26,2026-10-04 10:31:11
+5,伊藤健太,ito.kenta@example.com,福岡県福岡市,2026-06-06 20:24:38,2026-06-06 20:24:38,2026-08-28 17:52:50
+6,渡辺さくら,watanabe.sakura@example.com,北海道札幌市,2026-06-22 18:31:27,2026-06-22 18:31:27,2026-07-09 07:43:11
+7,山本大輔,yamamoto.daisuke@example.com,埼玉県さいたま市,2026-04-22 07:27:28,2026-04-22 07:27:28,2026-05-22 05:31:58
+8,中村結衣,nakamura.yui@example.com,千葉県千葉市,2026-05-01 10:38:12,2026-05-01 10:38:12,2026-09-19 20:11:32
+9,小林翔太,kobayashi.shota@example.com,兵庫県神戸市,2026-05-09 04:13:54,2026-05-09 04:13:54,2026-06-15 19:08:52
+10,加藤凛,kato.rin@example.com,京都府京都市,2026-06-04 14:17:22,2026-06-04 14:17:22,2026-07-01 13:30:53
+11,吉田健二,yoshida.kenji@example.com,静岡県静岡市,2026-05-11 15:22:14,2026-05-11 15:22:14,2026-10-01 15:29:35
+12,山田美緒,yamada.mio@example.com,広島県広島市,2026-06-12 05:29:28,2026-06-12 05:29:28,2026-10-24 03:25:18
+13,佐々木大和,sasaki.yamato@example.com,宮城県仙台市,2026-06-07 12:17:14,2026-06-07 12:17:14,2026-10-11 07:25:10
+14,松本ゆな,matsumoto.yuna@example.com,新潟県新潟市,2026-06-22 04:40:32,2026-06-22 04:40:32,2026-08-25 07:41:40
+15,井上健一,inoue.kenichi@example.com,岡山県岡山市,2026-04-27 22:55:07,2026-04-27 22:55:07,2026-07-06 05:05:37

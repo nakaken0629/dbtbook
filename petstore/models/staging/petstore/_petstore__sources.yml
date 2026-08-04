@@ -7,6 +7,11 @@ sources:
       scripts/create_petstore_raw_views.sql により sources/ 配下のCSVを
       petstore_raw スキーマのビューとして dev.duckdb 上に作成したもの。
     schema: petstore_raw
+    config:
+      freshness:
+        warn_after: { count: 1, period: day }
+        error_after: { count: 3, period: day }
+      loaded_at_field: created_at
     tables:
       - name: customer
         description: 購入者（顧客）情報。
@@ -75,6 +80,11 @@ sources:
 
       - name: sales
         description: 顧客からの注文（受注）ヘッダ。1行が1回の注文に対応する。
+        loaded_at_field: created_at
+        freshness:
+          warn_after: { count: 12, period: hour }
+          error_after: { count: 24, period: hour }
+        filter: "order_date >= current_date - interval '12' hour"
         columns:
           - name: sales_id
             description: 売上ID（注文番号）。主キー。

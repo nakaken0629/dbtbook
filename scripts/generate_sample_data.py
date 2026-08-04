@@ -6,10 +6,14 @@ sources/transactions（customer.csv, sales/, sales_detail/）にトランザク�
 """
 import csv
 import random
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 random.seed(42)
+# created_at/updated_at 専用の乱数系列。
+# 既存カラム（sales_id, customer_id, 商品選択, quantity等）の乱数系列に
+# 影響を与えないよう、random モジュールの共有状態とは分離する。
+ts_rng = random.Random(20260701)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SOURCES_DIR = BASE_DIR / "sources"
@@ -29,6 +33,26 @@ def write_csv(path: Path, header: list, rows: list):
         writer.writerows(rows)
 
 
+def random_date_between(start_date: date, end_date: date) -> date:
+    days_span = (end_date - start_date).days
+    return start_date + timedelta(days=ts_rng.randint(0, days_span))
+
+
+def gen_timestamps(base_date: date, max_update_days: int = 7):
+    """base_date 当日のランダムな時刻を created_at、
+    その後 0〜max_update_days 日以内のランダムな時刻を updated_at として返す。"""
+    created_at = datetime.combine(base_date, datetime.min.time()) + timedelta(
+        seconds=ts_rng.randint(0, 24 * 3600 - 1)
+    )
+    updated_at = created_at + timedelta(seconds=ts_rng.randint(0, max_update_days * 24 * 3600))
+    return created_at.isoformat(sep=" "), updated_at.isoformat(sep=" ")
+
+
+# マスタ系（species_master, goods_category_master, product_master）は
+# 販売開始（2026-07-01）より前のこの期間中にセットアップされた想定
+MASTER_SETUP_START = date(2026, 6, 1)
+MASTER_SETUP_END = date(2026, 6, 30)
+
 # ---------- species_master ----------
 SPECIES = [
     (1, "犬"),
@@ -37,7 +61,14 @@ SPECIES = [
     (4, "魚"),
     (5, "爬虫類"),
 ]
-write_csv(MASTERS_DIR / "species_master.csv", ["species_id", "species_name"], SPECIES)
+write_csv(
+    MASTERS_DIR / "species_master.csv",
+    ["species_id", "species_name", "created_at", "updated_at"],
+    [
+        (*s, *gen_timestamps(random_date_between(MASTER_SETUP_START, MASTER_SETUP_END)))
+        for s in SPECIES
+    ],
+)
 
 # ---------- goods_category_master ----------
 GOODS_CATEGORIES = [
@@ -47,8 +78,11 @@ GOODS_CATEGORIES = [
 ]
 write_csv(
     MASTERS_DIR / "goods_category_master.csv",
-    ["goods_category_id", "goods_category_name"],
-    GOODS_CATEGORIES,
+    ["goods_category_id", "goods_category_name", "created_at", "updated_at"],
+    [
+        (*g, *gen_timestamps(random_date_between(MASTER_SETUP_START, MASTER_SETUP_END)))
+        for g in GOODS_CATEGORIES
+    ],
 )
 
 # ---------- product_master (PET) ----------
@@ -105,8 +139,11 @@ product_master_rows.sort(key=lambda r: r[0])
 write_csv(
     MASTERS_DIR / "product_master.csv",
     ["product_id", "product_type", "product_name", "price", "is_active",
-     "species_id", "goods_category_id", "description"],
-    product_master_rows,
+     "species_id", "goods_category_id", "description", "created_at", "updated_at"],
+    [
+        (*row, *gen_timestamps(random_date_between(MASTER_SETUP_START, MASTER_SETUP_END), max_update_days=20))
+        for row in product_master_rows
+    ],
 )
 
 PRODUCT_PRICE = {row[0]: row[3] for row in product_master_rows}
@@ -114,27 +151,40 @@ PET_IDS = [p[0] for p in PETS]
 GOODS_IDS = [g[0] for g in GOODS]
 
 # ---------- customer（マスタではなくトランザクション系として transactions/ に置く） ----------
+# customer レコードの created_at はこの期間内に収まる想定（registered_at とは独立）
+CUSTOMER_CREATED_AT_START = date(2026, 4, 1)
+CUSTOMER_CREATED_AT_END = date(2026, 6, 30)
+
 CUSTOMERS = [
-    (1, "田中太郎", "tanaka.taro@example.com", "東京都新宿区", date(2025, 3, 15)),
-    (2, "佐藤花子", "sato.hanako@example.com", "大阪府大阪市", date(2025, 4, 2)),
-    (3, "鈴木一郎", "suzuki.ichiro@example.com", "神奈川県横浜市", date(2025, 4, 20)),
-    (4, "高橋美咲", "takahashi.misaki@example.com", "愛知県名古屋市", date(2025, 5, 11)),
-    (5, "伊藤健太", "ito.kenta@example.com", "福岡県福岡市", date(2025, 5, 30)),
-    (6, "渡辺さくら", "watanabe.sakura@example.com", "北海道札幌市", date(2025, 6, 18)),
-    (7, "山本大輔", "yamamoto.daisuke@example.com", "埼玉県さいたま市", date(2025, 7, 2)),
-    (8, "中村結衣", "nakamura.yui@example.com", "千葉県千葉市", date(2025, 7, 25)),
-    (9, "小林翔太", "kobayashi.shota@example.com", "兵庫県神戸市", date(2025, 8, 14)),
-    (10, "加藤凛", "kato.rin@example.com", "京都府京都市", date(2025, 9, 5)),
-    (11, "吉田健二", "yoshida.kenji@example.com", "静岡県静岡市", date(2025, 10, 1)),
-    (12, "山田美緒", "yamada.mio@example.com", "広島県広島市", date(2025, 10, 20)),
-    (13, "佐々木大和", "sasaki.yamato@example.com", "宮城県仙台市", date(2025, 11, 12)),
-    (14, "松本ゆな", "matsumoto.yuna@example.com", "新潟県新潟市", date(2025, 12, 3)),
-    (15, "井上健一", "inoue.kenichi@example.com", "岡山県岡山市", date(2026, 1, 15)),
+    (1, "田中太郎", "tanaka.taro@example.com", "東京都新宿区"),
+    (2, "佐藤花子", "sato.hanako@example.com", "大阪府大阪市"),
+    (3, "鈴木一郎", "suzuki.ichiro@example.com", "神奈川県横浜市"),
+    (4, "高橋美咲", "takahashi.misaki@example.com", "愛知県名古屋市"),
+    (5, "伊藤健太", "ito.kenta@example.com", "福岡県福岡市"),
+    (6, "渡辺さくら", "watanabe.sakura@example.com", "北海道札幌市"),
+    (7, "山本大輔", "yamamoto.daisuke@example.com", "埼玉県さいたま市"),
+    (8, "中村結衣", "nakamura.yui@example.com", "千葉県千葉市"),
+    (9, "小林翔太", "kobayashi.shota@example.com", "兵庫県神戸市"),
+    (10, "加藤凛", "kato.rin@example.com", "京都府京都市"),
+    (11, "吉田健二", "yoshida.kenji@example.com", "静岡県静岡市"),
+    (12, "山田美緒", "yamada.mio@example.com", "広島県広島市"),
+    (13, "佐々木大和", "sasaki.yamato@example.com", "宮城県仙台市"),
+    (14, "松本ゆな", "matsumoto.yuna@example.com", "新潟県新潟市"),
+    (15, "井上健一", "inoue.kenichi@example.com", "岡山県岡山市"),
 ]
+
+customer_rows = []
+for c in CUSTOMERS:
+    # registered_at は created_at と同じ値にする
+    created_at, updated_at = gen_timestamps(
+        random_date_between(CUSTOMER_CREATED_AT_START, CUSTOMER_CREATED_AT_END), max_update_days=180
+    )
+    customer_rows.append((*c, created_at, created_at, updated_at))
+
 write_csv(
     TRANSACTIONS_DIR / "customer.csv",
-    ["customer_id", "customer_name", "email", "address", "registered_at"],
-    CUSTOMERS,
+    ["customer_id", "customer_name", "email", "address", "registered_at", "created_at", "updated_at"],
+    customer_rows,
 )
 CUSTOMER_IDS = [c[0] for c in CUSTOMERS]
 
@@ -162,28 +212,49 @@ while current <= END_DATE:
         chosen_products = random.sample(PET_IDS + GOODS_IDS, k=num_items)
 
         total_amount = 0
+        order_detail_rows = []
         for product_id in chosen_products:
             quantity = 1 if product_id in PET_IDS else random.randint(1, 3)
             unit_price = PRODUCT_PRICE[product_id]
             amount = unit_price * quantity
             total_amount += amount
 
-            day_detail_rows.append(
-                (detail_id_seq, sales_id, product_id, quantity, unit_price, amount)
-            )
+            order_detail_rows.append((detail_id_seq, sales_id, product_id, quantity, unit_price, amount))
             detail_id_seq += 1
 
-        day_sales_rows.append((sales_id, customer_id, current.isoformat(), total_amount))
+        # 受注日時（order_date 当日のランダムな時刻）と更新日時（作成後0〜180分後）
+        order_created_at = datetime.combine(current, datetime.min.time()) + timedelta(
+            seconds=ts_rng.randint(0, 24 * 3600 - 1)
+        )
+        order_updated_at = order_created_at + timedelta(minutes=ts_rng.randint(0, 180))
+
+        day_sales_rows.append(
+            (
+                sales_id, customer_id, current.isoformat(), total_amount,
+                order_created_at.isoformat(sep=" "), order_updated_at.isoformat(sep=" "),
+            )
+        )
+
+        for detail_id, s_id, product_id, quantity, unit_price, amount in order_detail_rows:
+            # 明細は受注と同時に作成され、0〜60分後に更新されることがある想定
+            detail_created_at = order_created_at
+            detail_updated_at = detail_created_at + timedelta(minutes=ts_rng.randint(0, 60))
+            day_detail_rows.append(
+                (
+                    detail_id, s_id, product_id, quantity, unit_price, amount,
+                    detail_created_at.isoformat(sep=" "), detail_updated_at.isoformat(sep=" "),
+                )
+            )
 
     date_str = current.strftime("%Y%m%d")
     write_csv(
         SALES_DIR / f"sales_{date_str}.csv",
-        ["sales_id", "customer_id", "order_date", "total_amount"],
+        ["sales_id", "customer_id", "order_date", "total_amount", "created_at", "updated_at"],
         day_sales_rows,
     )
     write_csv(
         SALES_DETAIL_DIR / f"sales_detail_{date_str}.csv",
-        ["sales_detail_id", "sales_id", "product_id", "quantity", "unit_price", "amount"],
+        ["sales_detail_id", "sales_id", "product_id", "quantity", "unit_price", "amount", "created_at", "updated_at"],
         day_detail_rows,
     )
 
