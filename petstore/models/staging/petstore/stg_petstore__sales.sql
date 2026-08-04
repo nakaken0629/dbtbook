@@ -1,7 +1,7 @@
 with source as (
 
     select * from {{ source('petstore', 'sales') }}
-    where order_date >= '{{ var("start_date") }}'
+    where order_date >= '{{ var("start_date", "2026-07-01") }}'
 ),
 
 renamed as (
