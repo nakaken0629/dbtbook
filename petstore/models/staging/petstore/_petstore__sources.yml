@@ -2,10 +2,7 @@ version: 2
 
 sources:
   - name: petstore
-    description: >
-      オンラインペットショップの基幹データ（顧客・商品マスタ・売上）。
-      scripts/create_petstore_raw_views.sql により sources/ 配下のCSVを
-      petstore_raw スキーマのビューとして dev.duckdb 上に作成したもの。
+    description: "{{ doc('petstore_source') }}"
     schema: petstore_raw
     config:
       freshness:
