@@ -58,11 +58,16 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    # 標準イメージはPython 3.7のため、Python 3.7向けwheelが存在する古いduckdbに固定
+    # （新しいduckdbは3.7用wheelがなくソースビルドになり、コンテナ内の権限不足でビルドに失敗する）
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-duckdb==0.9.2}
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
+    # petstore_raw取り込みDAG用: CSVソースと、CSV取り込み先のDuckDBファイルを含む dbt プロジェクト
+    - ../sources:/opt/airflow/sources:ro
+    - ../petstore:/opt/airflow/petstore
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

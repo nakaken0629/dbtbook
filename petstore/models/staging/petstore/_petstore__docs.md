@@ -5,6 +5,8 @@
 - 商品マスタ
 - 売上
 
-scripts/create_petstore_raw_views.sql により sources/ 配下のCSVをpetstore_raw スキーマのビューとして dev.duckdb 上に作成したもの。
-DuckDBのread_csv関数を使っているため**リアルタイムで**CSVの内容がソースに反映されます。
+Airflow のDAG（airflow/dags/load_petstore_raw.py）により sources/ 配下のCSVを読み込み、
+petstore_raw スキーマのテーブルとして dev.duckdb 上に作成したもの。
+DAGを実行（またはAirflowを使わない場合は scripts/load_petstore_raw.sql を手動実行）するたびに
+テーブルが最新のCSVの内容で洗い替えされます。
 {% enddocs %}
