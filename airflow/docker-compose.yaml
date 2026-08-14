@@ -60,7 +60,8 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     # 標準イメージはPython 3.7のため、Python 3.7向けwheelが存在する古いduckdbに固定
     # （新しいduckdbは3.7用wheelがなくソースビルドになり、コンテナ内の権限不足でビルドに失敗する）
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-duckdb==0.9.2}
+    # dbt-duckdb: run_petstore_dbt DAGがコンテナ内で直接 `dbt` CLI を実行するために必要
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-duckdb==0.9.2 dbt-duckdb}
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs

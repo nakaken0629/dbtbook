@@ -3,3 +3,7 @@ target/
 dbt_packages/
 logs/
 .env
+
+# dbt実行時に自動生成される匿名テレメトリ用ID(コンテナ内でHOMEが未設定のため
+# 本来 ~/.dbt/ に置かれるはずのファイルがここに生成される)
+.user.yml

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import duckdb
 from airflow.decorators import dag, task
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 SOURCES_DIR = Path("/opt/airflow/sources")
 DUCKDB_PATH = Path("/opt/airflow/petstore/dev.duckdb")
@@ -72,6 +73,11 @@ def load_petstore_raw():
     def load_sales_detail():
         _load_table("sales_detail", "transactions/sales_detail/sales_detail_*.csv")
 
+    trigger_dbt = TriggerDagRunOperator(
+        task_id="trigger_run_petstore_dbt",
+        trigger_dag_id="run_petstore_dbt",
+    )
+
     (
         load_species_master()
         >> load_goods_category_master()
@@ -79,6 +85,7 @@ def load_petstore_raw():
         >> load_customer()
         >> load_sales()
         >> load_sales_detail()
+        >> trigger_dbt
     )
 
 

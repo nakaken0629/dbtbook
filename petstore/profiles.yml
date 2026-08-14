@@ -1,0 +1,14 @@
+# petstore プロジェクト用の dbt profile。
+# DuckDBはローカルファイルを直接読み書きするだけで認証情報を持たないため、
+# （通常の profiles.yml と異なり秘匿情報を含まないため）リポジトリにコミットしている。
+#
+# Airflow の run_petstore_dbt DAG は、petstore/ をマウントした airflow-worker
+# コンテナ内で `dbt --profiles-dir /opt/airflow/petstore` として直接このファイルを参照する。
+petstore:
+  outputs:
+    dev:
+      type: duckdb
+      path: dev.duckdb
+      schema: main
+      threads: 1
+  target: dev
