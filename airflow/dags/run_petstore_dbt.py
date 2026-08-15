@@ -1,9 +1,9 @@
 """petstore の dbt プロジェクトを実行する DAG。
 
-Airflow コンテナ自体に dbt-duckdb をインストールし（docker-compose.yaml の
-_PIP_ADDITIONAL_REQUIREMENTS）、petstore/ をマウントした airflow-worker
-コンテナ内で dbt CLI を直接実行する。load_petstore_raw DAG の完了後に
-トリガーされる想定。
+Airflow コンテナ自体に dbt-duckdb をインストールし（airflow/Dockerfile で
+apache/airflow イメージを拡張してビルド）、petstore/ をマウントした
+airflow-worker コンテナ内で dbt CLI を直接実行する。load_petstore_raw DAG
+の完了後にトリガーされる想定。
 """
 from __future__ import annotations
 
