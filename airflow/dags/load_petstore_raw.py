@@ -5,10 +5,8 @@
 経由していたが、このDAGが CSV の内容を実テーブルへロードし、
 dbt の source() は petstore_raw スキーマの実テーブルを参照する。
 
-各テーブルのロードタスクは互いに依存しないため、DAG上は並列実行可能な形にしている。
-ただし DuckDB はファイルへの書き込みを同時に1接続しか許可しないため、
-Airflow の Pool（duckdb_writer, スロット数1）で実際の同時実行数を1に絞り、
-書き込みが競合しないようにしている。
+DuckDB はファイルへの書き込みを同時に1接続しか許可しないため、
+各テーブルのロードタスクは並列実行させず直列に依存させている。
 """
 from __future__ import annotations
 
@@ -51,27 +49,27 @@ def _load_table(table_name: str, csv_glob: str) -> None:
     tags=["petstore", "duckdb"],
 )
 def load_petstore_raw():
-    @task(pool="duckdb_writer")
+    @task
     def load_species_master():
         _load_table("species_master", "masters/species_master.csv")
 
-    @task(pool="duckdb_writer")
+    @task
     def load_goods_category_master():
         _load_table("goods_category_master", "masters/goods_category_master.csv")
 
-    @task(pool="duckdb_writer")
+    @task
     def load_product_master():
         _load_table("product_master", "masters/product_master.csv")
 
-    @task(pool="duckdb_writer")
+    @task
     def load_customer():
         _load_table("customer", "transactions/customer.csv")
 
-    @task(pool="duckdb_writer")
+    @task
     def load_sales():
         _load_table("sales", "transactions/sales/sales_*.csv")
 
-    @task(pool="duckdb_writer")
+    @task
     def load_sales_detail():
         _load_table("sales_detail", "transactions/sales_detail/sales_detail_*.csv")
 
@@ -80,16 +78,15 @@ def load_petstore_raw():
         trigger_dag_id="run_petstore_dbt",
     )
 
-    load_tasks = [
-        load_species_master(),
-        load_goods_category_master(),
-        load_product_master(),
-        load_customer(),
-        load_sales(),
-        load_sales_detail(),
-    ]
-
-    load_tasks >> trigger_dbt
+    (
+        load_species_master()
+        >> load_goods_category_master()
+        >> load_product_master()
+        >> load_customer()
+        >> load_sales()
+        >> load_sales_detail()
+        >> trigger_dbt
+    )
 
 
 dag = load_petstore_raw()

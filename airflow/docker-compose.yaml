@@ -233,10 +233,7 @@ services:
         fi
         mkdir -p /sources/logs /sources/dags /sources/plugins
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
-        /entrypoint airflow version
-        # DuckDBはファイルへの書き込みを同時に1接続しか許可しないため、
-        # load_petstore_raw DAGの各ロードタスクをこのPool（スロット数1）で直列化する。
-        gosu airflow airflow pools set duckdb_writer 1 "DuckDBファイル(petstore/dev.duckdb)への書き込みを直列化するためのプール"
+        exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:
       <<: *airflow-common-env
